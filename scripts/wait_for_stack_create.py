@@ -6,11 +6,6 @@ import time
 
 cf = boto3.client('cloudformation')
 
-def create_stack(stackName, templateFile):
-  with open(templateFile, 'r') as file:
-    template = file.read()
-  cf.create_stack(StackName=stackName, TemplateBody=template)
-
 def wait_for_stack_create(stackName):
   stack_description = cf.describe_stacks(StackName=stackName)
   status = stack_description['Stacks'][0]['StackStatus']
@@ -32,10 +27,9 @@ def wait_for_stack_create(stackName):
 
 def main(argv):
   stackName    = sys.argv[1]
-  templateFile = sys.argv[2]
-  
-  create_stack(stackName, templateFile)
-  print "Started stack creation for %s", stackName
+    
+  while 1:
+    wait_for_stack_create(stackName)
   
 if __name__ == "__main__":
     main(sys.argv[1:])
