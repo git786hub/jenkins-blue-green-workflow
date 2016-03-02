@@ -15,19 +15,29 @@ node {
    regions.add("us-west-1")
 
    stage "CreateStacks"
+   
+   // Start stack creations
    regions.each { region->
      createCfnStack(region, "cfn/web-asg.json", WEB_ASG_STACK_NAME)
      createCfnStack(region, "cfn/elb.json", STAGING_ELB_STACK_NAME)
    }
    
+   // Wait for CloudFormation stack creation
    regions.each { region->
      waitForCfnStackCreation(region, WEB_ASG_STACK_NAME)
      waitForCfnStackCreation(region, STAGING_ELB_STACK_NAME)
    }
    
    stage "AssociateWebStackWithStagingELB"
+   
+   // Associate Staging ELB with AutoScaling group
    regions.each { region->
      associateASGWithELB(region, WEB_ASG_STACK_NAME,  STAGING_ELB_STACK_NAME)
+   }
+   
+   // Wait for the ELB to put instances in service
+   regions.each { region->
+     waitForASGInstancesToGoInService(region, WEB_ASG_STACK_NAME, STAGING_ELB_STACK_NAME)
    }
    
 }
@@ -43,4 +53,8 @@ def waitForCfnStackCreation(def awsRegion, def stackName) {
 
 def associateASGWithELB(def awsRegion, def asgStack, def elbStack) {
   sh "AWS_DEFAULT_REGION=${awsRegion} scripts/assoc_asg_elb.py ${asgStack} ${elbStack} "
+}
+
+def waitForASGInstancesToGoInService(def awsRegion, def asgStack, def elbStack) {
+  sh "AWS_DEFAULT_REGION=${awsRegion} scripts/wait_for_asg_elb_registration.py ${asgStack} ${elbStack} "
 }
