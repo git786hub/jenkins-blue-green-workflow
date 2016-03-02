@@ -11,7 +11,7 @@ node {
 
    // Mark the code build 'stage'....
    stage 'DeployStaging'
-   sh "find ."
+   sh "scripts/create_stack.groovy"
    
    // Run the maven build
    sayHello()
