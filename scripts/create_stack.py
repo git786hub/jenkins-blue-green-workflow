@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 
-from boto3.session import Session
-
 import boto3
 import sys
 import time
@@ -33,8 +31,8 @@ def wait_for_stack_create(stackName):
     sys.exit(1)
 
 def main(argv):
-  stackName    = sys.argv[2]
-  templateFile = sys.argv[3]
+  stackName    = sys.argv[1]
+  templateFile = sys.argv[2]
   
   create_stack(stackName, templateFile)
   
