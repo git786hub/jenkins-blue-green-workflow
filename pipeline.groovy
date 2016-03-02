@@ -16,5 +16,5 @@ node {
 def createCfnStack(def awsRegion, def templateFile, def stackName) {
   
   // Execute create-stack command
-  sh "scripts/create_stack.py ${awsRegion} ${stackName} ${templateFile} "
+  sh "AWS_DEFAULT_REGION=${awsRegion} scripts/create_stack.py ${awsRegion} ${stackName} ${templateFile} "
 }
