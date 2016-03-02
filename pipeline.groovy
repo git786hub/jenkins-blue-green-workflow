@@ -16,7 +16,5 @@ node {
 def createCfnStack(def awsRegion, def templateFile, def stackName) {
   
   // Execute create-stack command
-  //sh "/bin/aws cloudformation create-stack --stack-name ${stackName} --template-body file://./${templateFile} --region ${awsRegion}"
-  
-  sh "scripts/create_stack.groovy ${awsRegion} ${templateFile} ${stackName}"
+  sh "scripts/create_stack.py ${awsRegion} ${stackName} ${templateFile} "
 }
