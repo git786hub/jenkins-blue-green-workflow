@@ -11,7 +11,9 @@ node {
 
    // Mark the code build 'stage'....
    stage 'DeployStaging'
-   sh "scripts/create_stack.groovy"
+   
+   def mvnHome = tool 'M3'
+   sh "${mvnHome}/bin/mvn -B -Dmaven.test.failure.ignore -f deployer/pom.xml clean package" 
    
    // Run the maven build
    sayHello()
