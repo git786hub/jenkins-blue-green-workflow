@@ -12,25 +12,33 @@ node {
    
    def regions = new ArrayList()
    regions.add("us-east-1")
+   regions.add("us-west-1")
 
+   stage "CreateStacks"
    regions.each { region->
-     
-     print "Deploying to region: ${region}"
-     
-     stage 'CreateStacks'
      createCfnStack(region, "cfn/web-asg.json", WEB_ASG_STACK_NAME)
      createCfnStack(region, "cfn/elb.json", STAGING_ELB_STACK_NAME)
-   
-     stage 'AssociateWebStackWithStagingELB'
-     associateASGWithELB(region, WEB_ASG_STACK_NAME,  STAGING_ELB_STACK_NAME)
    }
    
+   regions.each { region->
+     waitForCfnStackCreation(region, WEB_ASG_STACK_NAME)
+     waitForCfnStackCreation(region, STAGING_ELB_STACK_NAME)
+   }
+   
+   stage "AssociateWebStackWithStagingELB"
+   regions.each { region->
+     associateASGWithELB(region, WEB_ASG_STACK_NAME,  STAGING_ELB_STACK_NAME)
+   }
    
 }
 
 def createCfnStack(def awsRegion, def templateFile, def stackName) {
   // Execute create-stack command
   sh "AWS_DEFAULT_REGION=${awsRegion} scripts/create_stack.py ${stackName} ${templateFile} "
+}
+
+def waitForCfnStackCreation(def awsRegion, def stackName) {
+  sh "AWS_DEFAULT_REGION=${awsRegion} scripts/wait_for_stack_create.py ${stackName} "
 }
 
 def associateASGWithELB(def awsRegion, def asgStack, def elbStack) {
