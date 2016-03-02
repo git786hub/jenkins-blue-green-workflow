@@ -1,6 +1,5 @@
-@Grab('com.amazonaws:aws-java-sdk-cloudformation:1.10.57')
 
-import java.util.List
+import static groovy.io.FileType.FILES
 
 node {
    // Mark the code checkout 'stage'....
@@ -8,17 +7,14 @@ node {
    sayHello()
 
    // Get some code from a GitHub repository
-   git url: 'https://github.com/vinayselvaraj/vpc2vpc.git'
-
-   // Get the maven tool.
-   // ** NOTE: This 'M3' maven tool must be configured
-   // **       in the global configuration.           
-   def mvnHome = tool 'M3'
+   git url: 'https://github.com/vinayselvaraj/jenkins-blue-green-workflow.git'
 
    // Mark the code build 'stage'....
-   stage 'Build'
+   stage 'DeployStaging'
+   sh "find ."
+   
    // Run the maven build
-   sh "${mvnHome}/bin/mvn clean install"
+   sayHello()
 }
 
 def sayHello() {
