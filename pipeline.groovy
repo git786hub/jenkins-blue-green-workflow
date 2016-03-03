@@ -37,7 +37,7 @@ node {
    }
    
    // Sleep for ASG instances to be registered
-   sleep(60000) // 60 seconds
+   sleep 60
    
    // Wait for the ELB to put instances in service
    regions.each { region->

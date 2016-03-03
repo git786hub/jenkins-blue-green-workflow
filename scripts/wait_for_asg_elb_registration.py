@@ -13,10 +13,10 @@ TIMEOUT = 900 # 15 minutes
 
 def wait_for_asg_elb_registration(asgStackName, elbStackName):
   
-  asg_resource = cf.describe_stack_resources(StackName=asgStackName, LogicalResourceId="WebAutoScalingGroup")
+  asg_resource = cf.describe_stack_resources(StackName=asgStackName, LogicalResourceId="WebASG")
   asg_name = asg_resource['StackResources'][0]['PhysicalResourceId']
   
-  elb_resource = cf.describe_stack_resources(StackName=elbStackName, LogicalResourceId="ELB")
+  elb_resource = cf.describe_stack_resources(StackName=elbStackName, LogicalResourceId="WebELB")
   elb_name = elb_resource['StackResources'][0]['PhysicalResourceId']
 
   asg_group = autoscaling.describe_auto_scaling_groups(AutoScalingGroupNames=[asg_name])['AutoScalingGroups'][0]
