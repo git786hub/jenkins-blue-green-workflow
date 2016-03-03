@@ -10,7 +10,8 @@ ASSUME_ROLE = os.environ.get('ASSUME_ROLE')
 
 sts = boto3.client('sts')
 if(ASSUME_ROLE != None):
-  role = sts.assume_role(ASSUME_ROLE)
+  role = sts.assume_role(RoleArn=ASSUME_ROLE,
+                         RoleSessionName="JenkinsBuild")
   session = boto3.Session(
               aws_access_key_id=role.credentials.access_key,
               aws_secret_access_key=role.credentials.secret_key,

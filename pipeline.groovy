@@ -1,5 +1,5 @@
 
-def assumeRole = "arn:....."
+assumeRole = "arn:....."
 
 node {
    // Mark the code checkout 'stage'....
