@@ -17,12 +17,12 @@ def wait_for_asg_elb_registration(asgStackName, elbStackName):
   
   elb_resource = cf.describe_stack_resources(StackName=elbStackName, LogicalResourceId="ELB")
   elb_name = elb_resource['StackResources'][0]['PhysicalResourceId']
-  
+
   asg_group = autoscaling.describe_auto_scaling_groups(AutoScalingGroupNames=[asg_name])['AutoScalingGroups'][0]
   asg_instances = asg_group['Instances']
-  
+
   instances = []
-  
+
   for asg_instance in asg_instances:
     instances.append( { 'InstanceId' : asg_instance['InstanceId'] } )
   

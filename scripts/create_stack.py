@@ -6,35 +6,30 @@ import time
 
 cf = boto3.client('cloudformation')
 
-def create_stack(stackName, templateFile):
+def create_stack(stackName, templateFile, environmentType):
+  
+  # Setup parameters
+  params = []
+  params.append( { 'ParameterKey' : 'EnvironmentType', 'ParameterValue' : environmentType } )
+  
+  for asg_instance in asg_instances:
+    instances.append( { 'InstanceId' : asg_instance['InstanceId'] } )
+  
+  # Read template file
   with open(templateFile, 'r') as file:
     template = file.read()
-  cf.create_stack(StackName=stackName, TemplateBody=template)
-
-def wait_for_stack_create(stackName):
-  stack_description = cf.describe_stacks(StackName=stackName)
-  status = stack_description['Stacks'][0]['StackStatus']
   
-  print "%s: %s", stackName, status
-  
-  if status in ['UPDATE_COMPLETE', 'CREATE_COMPLETE']:
-    print "Stack %s has been created", stackName
-    sys.exit(0)
-        
-  elif status in ['UPDATE_IN_PROGRESS', 'UPDATE_ROLLBACK_IN_PROGRESS', 
-      'UPDATE_ROLLBACK_COMPLETE_CLEANUP_IN_PROGRESS', 'CREATE_IN_PROGRESS', 
-      'ROLLBACK_IN_PROGRESS']:
-    time.sleep(15)
-       
-  else:
-    print "Stack %s failed to create!", stackName
-    sys.exit(1)
+  # Create stack
+  cf.create_stack(StackName=stackName,
+                  TemplateBody=template,
+                  Parameters=params)
 
 def main(argv):
-  stackName    = sys.argv[1]
-  templateFile = sys.argv[2]
+  stackName       = sys.argv[1]
+  templateFile    = sys.argv[2]
+  environmentType = sys.argv[3]
   
-  create_stack(stackName, templateFile)
+  create_stack(stackName, templateFile, environmentType)
   print "Started stack creation for %s", stackName
   
 if __name__ == "__main__":
