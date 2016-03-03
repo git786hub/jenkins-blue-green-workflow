@@ -1,6 +1,4 @@
 
-import static groovy.io.FileType.FILES
-
 node {
    // Mark the code checkout 'stage'....
    stage 'Checkout'
