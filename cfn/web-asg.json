@@ -4,6 +4,12 @@
   "Description" : "Web Stack",
   
   "Parameters" : {
+    
+    "EnvironmentType" : {
+      "Description" : "Environment Type",
+      "Type" : "String"
+    },
+    
     "AmiId" : {
       "Description" : "AMI Id to use",
       "Type" : "AWS::EC2::Image::Id",

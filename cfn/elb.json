@@ -3,6 +3,14 @@
   
   "Description" : "Web Stack",
   
+  "Parameters" : {
+
+    "EnvironmentType" : {
+      "Description" : "Environment Type",
+      "Type" : "String"
+    }
+  },
+  
   "Resources" : {
     "ELB" : {
       "Type" : "AWS::ElasticLoadBalancing::LoadBalancer",
