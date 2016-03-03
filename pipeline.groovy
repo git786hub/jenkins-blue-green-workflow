@@ -19,8 +19,8 @@ node {
    // Start stack creations
    regions.each { region->
           
-     createCfnStack(region, "cfn/web-asg.json", "cfn/${region}-web-asg.properties", WEB_ASG_STACK_NAME, "production")
-     createCfnStack(region, "cfn/elb.json",     "cfn/${region}-elb.properties", STAGING_ELB_STACK_NAME, "staging")
+     createCfnStack(region, "cfn/web-asg.json", "cfn/${region}-web-asg-param.properties", WEB_ASG_STACK_NAME, "production")
+     createCfnStack(region, "cfn/elb.json",     "cfn/${region}-elb-param.properties", STAGING_ELB_STACK_NAME, "staging")
    }
    
    // Wait for CloudFormation stack creation
