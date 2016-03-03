@@ -10,10 +10,10 @@ autoscaling = boto3.client('autoscaling')
 
 def associate_asg_with_elb(asgStackName, elbStackName):
   
-  asg_resource = cf.describe_stack_resources(StackName=asgStackName, LogicalResourceId="WebAutoScalingGroup")
+  asg_resource = cf.describe_stack_resources(StackName=asgStackName, LogicalResourceId="WebASG")
   asg_name = asg_resource['StackResources'][0]['PhysicalResourceId']
   
-  elb_resource = cf.describe_stack_resources(StackName=elbStackName, LogicalResourceId="ELB")
+  elb_resource = cf.describe_stack_resources(StackName=elbStackName, LogicalResourceId="WebELB")
   elb_name = elb_resource['StackResources'][0]['PhysicalResourceId']
   
   resp = autoscaling.attach_load_balancers(AutoScalingGroupName=asg_name, LoadBalancerNames=[elb_name])
