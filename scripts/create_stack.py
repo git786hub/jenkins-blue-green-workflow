@@ -6,21 +6,7 @@ import os
 import sys
 import time
 
-ASSUME_ROLE = os.environ.get('ASSUME_ROLE')
-
-sts = boto3.client('sts')
-if(ASSUME_ROLE != None):
-  role = sts.assume_role(RoleArn=ASSUME_ROLE,
-                         RoleSessionName="JenkinsBuild")
-  session = boto3.Session(
-              aws_access_key_id=role['Credentials']['AccessKeyId'],
-              aws_secret_access_key=role['Credentials']['SecretAccessKey'],
-              aws_session_token=role['Credentials']['SessionToken']
-            )
-  cf = session.resource('cloudformation')
-  
-else:
-  cf  = boto3.client('cloudformation')
+cf  = boto3.client('cloudformation')
 
 def create_stack(stackName, templateFile, paramFilename, environmentType):
   
@@ -54,7 +40,7 @@ def main(argv):
   environmentType = sys.argv[4]
   
   create_stack(stackName, templateFile, paramFilename, environmentType)
-  print "Started stack creation for %s", stackName
+  print "Started stack creation for %s" % (stackName)
   
 if __name__ == "__main__":
     main(sys.argv[1:])

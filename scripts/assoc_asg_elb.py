@@ -5,23 +5,8 @@ import os
 import sys
 import time
 
-ASSUME_ROLE = os.environ.get('ASSUME_ROLE')
-
-sts = boto3.client('sts')
-if(ASSUME_ROLE != None):
-  role = sts.assume_role(RoleArn=ASSUME_ROLE,
-                         RoleSessionName="JenkinsBuild")
-  session = boto3.Session(
-              aws_access_key_id=role['Credentials']['AccessKeyId'],
-              aws_secret_access_key=role['Credentials']['SecretAccessKey'],
-              aws_session_token=role['Credentials']['SessionToken']
-            )
-  cf          = session.resource('cloudformation')
-  autoscaling = session.resource('autoscaling')
-  
-else:
-  cf          = boto3.client('cloudformation')
-  autoscaling = boto3.client('autoscaling')
+cf          = boto3.client('cloudformation')
+autoscaling = boto3.client('autoscaling')
 
 def associate_asg_with_elb(asgStackName, elbStackName):
   

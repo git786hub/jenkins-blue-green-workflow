@@ -5,25 +5,9 @@ import os
 import sys
 import time
 
-ASSUME_ROLE = os.environ.get('ASSUME_ROLE')
-
-sts = boto3.client('sts')
-if(ASSUME_ROLE != None):
-  role = sts.assume_role(RoleArn=ASSUME_ROLE,
-                         RoleSessionName="JenkinsBuild")
-  session = boto3.Session(
-              aws_access_key_id=role['Credentials']['AccessKeyId'],
-              aws_secret_access_key=role['Credentials']['SecretAccessKey'],
-              aws_session_token=role['Credentials']['SessionToken']
-            )
-  cf          = session.resource('cloudformation')
-  autoscaling = session.resource('autoscaling')
-  elb         = session.resource('elb')
-  
-else:
-  cf          = boto3.client('cloudformation')
-  autoscaling = boto3.client('autoscaling')
-  elb         = boto3.client('elb')
+cf          = boto3.client('cloudformation')
+autoscaling = boto3.client('autoscaling')
+elb         = boto3.client('elb')
 
 TIMEOUT = 900 # 15 minutes
 
@@ -56,7 +40,7 @@ def wait_for_asg_elb_registration(asgStackName, elbStackName):
         break
     
     if all_in_service:
-      print "All instances are now in service. ASG=%s ELB=%s", asg_name, elb_name
+      print "All instances are now in service. ASG=%s ELB=%s" % (asg_name, elb_name)
       sys.exit(0)
     
     current_time = int(time.time())
