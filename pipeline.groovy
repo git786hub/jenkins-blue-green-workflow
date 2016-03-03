@@ -36,6 +36,9 @@ node {
      associateASGWithELB(region, WEB_ASG_STACK_NAME,  STAGING_ELB_STACK_NAME)
    }
    
+   // Sleep for ASG instances to be registered
+   sleep(60000) // 60 seconds
+   
    // Wait for the ELB to put instances in service
    regions.each { region->
      waitForASGInstancesToGoInService(region, WEB_ASG_STACK_NAME, STAGING_ELB_STACK_NAME)
