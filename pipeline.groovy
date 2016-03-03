@@ -73,6 +73,11 @@ def createCfnStack(def awsRegion, def templateFile, def paramFile, def stackName
   sh "AWS_DEFAULT_REGION=${awsRegion} scripts/create_stack.py ${stackName} ${templateFile} ${paramFile} ${environmentType}"
 }
 
+def deleteCfnStack(def awsRegion, def stackName) {
+  // Execute create-stack command
+  sh "AWS_DEFAULT_REGION=${awsRegion} scripts/delete_stack.py ${stackName}"
+}
+
 def waitForCfnStackCreation(def awsRegion, def stackName) {
   sh "AWS_DEFAULT_REGION=${awsRegion} scripts/wait_for_stack_create.py ${stackName} "
 }
