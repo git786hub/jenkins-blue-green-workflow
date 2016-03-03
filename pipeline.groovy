@@ -59,6 +59,10 @@ def associateASGWithELB(def awsRegion, def asgStack, def elbStack) {
   sh "AWS_DEFAULT_REGION=${awsRegion} ASSUME_ROLE=${assumeRole} scripts/assoc_asg_elb.py ${asgStack} ${elbStack} "
 }
 
+def disassociateASGWithELB(def awsRegion, def asgStack, def elbStack) {
+  sh "AWS_DEFAULT_REGION=${awsRegion} ASSUME_ROLE=${assumeRole} scripts/deassoc_asg_elb.py ${asgStack} ${elbStack} "
+}
+
 def waitForASGInstancesToGoInService(def awsRegion, def asgStack, def elbStack) {
   sh "AWS_DEFAULT_REGION=${awsRegion} ASSUME_ROLE=${assumeRole} scripts/wait_for_asg_elb_registration.py ${asgStack} ${elbStack} "
 }
