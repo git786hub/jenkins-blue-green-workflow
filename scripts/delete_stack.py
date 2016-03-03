@@ -9,7 +9,7 @@ import time
 cf  = boto3.client('cloudformation')
 
 def delete_stack(stackName):
-  cf.create_stack(StackName=stackName)
+  cf.delete_stack(StackName=stackName)
 
 def main(argv):
   stackName       = sys.argv[1]
