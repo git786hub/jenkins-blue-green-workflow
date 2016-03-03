@@ -18,8 +18,11 @@ node {
    
    // Start stack creations
    regions.each { region->
-     createCfnStack(region, "cfn/web-asg.json", WEB_ASG_STACK_NAME, "production")
-     createCfnStack(region, "cfn/elb.json", STAGING_ELB_STACK_NAME, "staging")
+     
+     def param_file = "cfn/${region}.properties"
+     
+     createCfnStack(region, "cfn/web-asg.json", param_file, WEB_ASG_STACK_NAME, "production")
+     createCfnStack(region, "cfn/elb.json",     param_file, STAGING_ELB_STACK_NAME, "staging")
    }
    
    // Wait for CloudFormation stack creation
@@ -42,9 +45,9 @@ node {
    
 }
 
-def createCfnStack(def awsRegion, def templateFile, def stackName, def environmentType) {
+def createCfnStack(def awsRegion, def templateFile, def paramFile, def stackName, def environmentType) {
   // Execute create-stack command
-  sh "AWS_DEFAULT_REGION=${awsRegion} scripts/create_stack.py ${stackName} ${templateFile} ${environmentType}"
+  sh "AWS_DEFAULT_REGION=${awsRegion} scripts/create_stack.py ${stackName} ${templateFile} ${paramFile} ${environmentType}"
 }
 
 def waitForCfnStackCreation(def awsRegion, def stackName) {
