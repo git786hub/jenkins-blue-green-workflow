@@ -9,6 +9,8 @@ node {
    
    def WEB_ASG_STACK_NAME = "web-asg-" + env.BUILD_NUMBER
    def STAGING_ELB_STACK_NAME = "staging-elb-" + env.BUILD_NUMBER
+   
+   def PRODUCTION_ELB_STACK_NAME = "bluegreen-poc-elb-prod"
       
    def regions = new ArrayList()
    regions.add("us-east-1")
@@ -44,6 +46,28 @@ node {
      waitForASGInstancesToGoInService(region, WEB_ASG_STACK_NAME, STAGING_ELB_STACK_NAME)
    }
    
+   // Test
+   
+   
+   // Disassociate Staging ELB from Green ASG
+   regions.each { region->
+     disassociateASGWithELB(region, WEB_ASG_STACK_NAME,  STAGING_ELB_STACK_NAME)
+   }
+   
+   // Associate Production ELB with AutoScaling group
+   regions.each { region->
+     associateASGWithELB(region, WEB_ASG_STACK_NAME,  PRODUCTION_ELB_STACK_NAME)
+   }
+   
+   // Sleep for ASG instances to be registered
+   sleep 60
+   
+   // Wait for the ELB to put instances in service
+   regions.each { region->
+     waitForASGInstancesToGoInService(region, WEB_ASG_STACK_NAME, PRODUCTION_ELB_STACK_NAME)
+   }
+   
+   // TODO: Disassociate old blue stack
 }
 
 def createCfnStack(def awsRegion, def templateFile, def paramFile, def stackName, def environmentType) {
