@@ -11,9 +11,9 @@ if(ASSUME_ROLE != None):
   role = sts.assume_role(RoleArn=ASSUME_ROLE,
                          RoleSessionName="JenkinsBuild")
   session = boto3.Session(
-              aws_access_key_id=role.credentials.access_key,
-              aws_secret_access_key=role.credentials.secret_key,
-              aws_session_token=role.credentials.session_token
+              aws_access_key_id=role['Credentials']['AccessKeyId'],
+              aws_secret_access_key=role['Credentials']['SecretAccessKey'],
+              aws_session_token=role['Credentials']['SessionToken']
             )
   cf = session.resource('cloudformation')
   
