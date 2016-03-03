@@ -2,9 +2,7 @@
 
 import boto3
 import json
-import os
 import sys
-import time
 
 cf  = boto3.client('cloudformation')
 
@@ -38,6 +36,8 @@ def main(argv):
   templateFile    = sys.argv[2]
   paramFilename   = sys.argv[3]
   environmentType = sys.argv[4]
+  
+  print "=== create_stack.py ==="
   
   create_stack(stackName, templateFile, paramFilename, environmentType)
   print "Started stack creation for %s" % (stackName)

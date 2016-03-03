@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 
 import boto3
-import os
 import sys
-import time
 
 cf          = boto3.client('cloudformation')
 autoscaling = boto3.client('autoscaling')
@@ -22,6 +20,8 @@ def associate_asg_with_elb(asgStackName, elbStackName):
 def main(argv):
   asgStackName    = sys.argv[1]
   elbStackName    = sys.argv[2]
+  
+  print "=== assoc_asg_elb.py ==="
   
   associate_asg_with_elb(asgStackName, elbStackName)
   

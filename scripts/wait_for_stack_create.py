@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import boto3
-import os
 import sys
 import time
 
@@ -28,6 +27,8 @@ def wait_for_stack_create(stackName):
 
 def main(argv):
   stackName    = sys.argv[1]
+  
+  print "=== wait_for_stack_create.py ==="
     
   while 1:
     wait_for_stack_create(stackName)

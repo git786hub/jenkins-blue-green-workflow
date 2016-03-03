@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import boto3
-import os
 import sys
 import time
 
@@ -56,6 +55,8 @@ def wait_for_asg_elb_registration(asgStackName, elbStackName):
 def main(argv):
   asgStackName    = sys.argv[1]
   elbStackName    = sys.argv[2]
+  
+  print "=== wait_for_asg_elb_registration.py ==="
   
   wait_for_asg_elb_registration(asgStackName, elbStackName)
   
