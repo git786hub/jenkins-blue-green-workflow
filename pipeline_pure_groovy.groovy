@@ -18,14 +18,13 @@ node {
    
    def web_asg_params   = readFile 'cfn/us-east-1-web-asg-param.properties'
    
-   create_cfn_stack("us-east-1", "web-asg-stack", web_asg_template, web_asg_params, "production")
+   create_cfn_stack("us-east-1", "web-asg-stack2", web_asg_template, web_asg_params, "production")
 }
 
 // ============================================================================
 
 def create_cfn_stack(def region, def stackName, def template, def paramsJson, def environmentType) {
   
-  // Setup parameters
   def parameters = new ArrayList()
   
   if(paramsJson != null && !paramsJson.isEmpty()) {
