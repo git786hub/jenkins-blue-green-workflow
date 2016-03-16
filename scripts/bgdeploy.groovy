@@ -152,8 +152,8 @@ class BGDeploy {
     
     // Disassociate Blue ASG from prod ELB
     if(PREVIOUS_ASG_STACK_NAME != null) {
-      println "Disassociating blue ASG stack ${WEB_ASG_STACK_NAME} from prod ELB ${PRODUCTION_ELB_STACK_NAME}"
-      disassociateASGWithELB(region, WEB_ASG_STACK_NAME,  PRODUCTION_ELB_STACK_NAME)
+      println "Disassociating blue ASG stack ${PREVIOUS_ASG_STACK_NAME} from prod ELB ${PRODUCTION_ELB_STACK_NAME}"
+      disassociateASGWithELB(region, PREVIOUS_ASG_STACK_NAME,  PRODUCTION_ELB_STACK_NAME)
     }
   }
 
