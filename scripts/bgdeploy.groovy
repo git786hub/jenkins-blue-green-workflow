@@ -101,9 +101,9 @@ class BGDeploy {
     // Update autoscaling group in web stack to match the min/max/desired counts in previous prod stack
     def previous_asg_counts = null
     if(PREVIOUS_ASG_STACK_NAME != null) {
-      def asg_counts = getWebASGMinMaxDesiredCounts(PREVIOUS_ASG_STACK_NAME)
+      previous_asg_counts = getWebASGMinMaxDesiredCounts(PREVIOUS_ASG_STACK_NAME)
       println "DEBUG: asg_counts=${asg_counts}"
-      updateASGCounts(WEB_ASG_STACK_NAME, asg_counts)
+      updateASGCounts(WEB_ASG_STACK_NAME, previous_asg_counts)
     }
     
     // Wait for autoscaling group to scale to desired count
@@ -134,7 +134,7 @@ class BGDeploy {
     // Update autoscaling group in web stack to match the min/max/desired counts in previous prod stack
     def previous_asg_counts = null
     if(PREVIOUS_ASG_STACK_NAME != null) {
-      def asg_counts = getWebASGMinMaxDesiredCounts(PREVIOUS_ASG_STACK_NAME)
+      previous_asg_counts = getWebASGMinMaxDesiredCounts(PREVIOUS_ASG_STACK_NAME)
       println "DEBUG: asg_counts=${asg_counts}"
       updateASGCounts(WEB_ASG_STACK_NAME, asg_counts)
     }
@@ -165,7 +165,7 @@ class BGDeploy {
         // Update previous prod autoscaling group in web stack to match the min/max/desired counts in green stack
         def previous_asg_counts = null
         if(PREVIOUS_ASG_STACK_NAME != null) {
-          def asg_counts = getWebASGMinMaxDesiredCounts(WEB_ASG_STACK_NAME)
+          previous_asg_counts = getWebASGMinMaxDesiredCounts(WEB_ASG_STACK_NAME)
           println "DEBUG: asg_counts=${asg_counts}"
           updateASGCounts(PREVIOUS_ASG_STACK_NAME, asg_counts)
         }
