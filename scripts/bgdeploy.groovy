@@ -109,7 +109,7 @@ class BGDeploy {
     // Wait for autoscaling group to scale to desired count
     if(previous_asg_counts != null) {
       println "Waiting for autoscaling group in stack ${WEB_ASG_STACK_NAME} to scale to desired count"
-      waitForASGToScaleToDesirecCount(WEB_ASG_STACK_NAME, asg_counts.get("desired")
+      waitForASGToScaleToDesirecCount(WEB_ASG_STACK_NAME, asg_counts.get("desired"))
     }
   
     // Associate Staging ELB with AutoScaling group
@@ -142,7 +142,7 @@ class BGDeploy {
     // Wait for autoscaling group to scale to desired count
     if(previous_asg_counts != null) {
       println "Waiting for autoscaling group in stack ${WEB_ASG_STACK_NAME} to scale to desired count"
-      waitForASGToScaleToDesirecCount(WEB_ASG_STACK_NAME, asg_counts.get("desired")
+      waitForASGToScaleToDesirecCount(WEB_ASG_STACK_NAME, asg_counts.get("desired"))
     }
  
     // Wait for the ELB to put instances in service
@@ -173,7 +173,7 @@ class BGDeploy {
         // Wait for autoscaling group to scale to desired count
         if(previous_asg_counts != null) {
           println "Waiting for autoscaling group in stack ${PREVIOUS_ASG_STACK_NAME} to scale to desired count"
-          waitForASGToScaleToDesirecCount(PREVIOUS_ASG_STACK_NAME, asg_counts.get("desired")
+          waitForASGToScaleToDesirecCount(PREVIOUS_ASG_STACK_NAME, asg_counts.get("desired"))
         }
 
         // Wait for the ELB to put instances in service
