@@ -398,6 +398,7 @@ class BGDeploy {
       updateASGRequest.minSize = counts.get("min")
       updateASGRequest.maxSize = counts.get("max")
       updateASGRequest.desiredCapacity = counts.get("desired")
+      updateASGRequest.autoScalingGroupName = webStackAsgName
       def updateASGResult = ASG_CLIENT.updateAutoScalingGroup(updateASGRequest)
       println "Updating AutoScaling Group in stack ${stackName} to counts ${counts}. Result=${updateASGResult}"
 
