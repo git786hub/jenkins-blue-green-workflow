@@ -30,7 +30,7 @@
       "Type" : "AWS::AutoScaling::AutoScalingGroup",
       "Properties" : {
         "AvailabilityZones" : { "Fn::GetAZs" : "" },
-        "LaunchConfigurationName" : { "Ref" : "WebLaunchConfig" },
+        "LaunchConfigurationName" : { "Ref" : "WebLC" },
         "MinSize" : "1",
         "MaxSize" : "10"
       }
