@@ -123,6 +123,7 @@ class BGDeploy {
   }
 
   def flip_green_to_blue() {
+    
     // Disassociate Staging ELB from Green ASG
     println "Disassocating Staging ELB ${STAGING_ELB_STACK_NAME} from Green ASG ${WEB_ASG_STACK_NAME}"
     disassociateASGWithELB(region, WEB_ASG_STACK_NAME,  STAGING_ELB_STACK_NAME)
@@ -148,6 +149,12 @@ class BGDeploy {
     // Wait for the ELB to put instances in service
     println "Waiting for instances to go in service"
     waitForASGInstancesToGoInService(region, WEB_ASG_STACK_NAME, PRODUCTION_ELB_STACK_NAME)
+    
+    // Disassociate Blue ASG from prod ELB
+    if(PREVIOUS_ASG_STACK_NAME != null) {
+      println "Disassociating blue ASG stack ${WEB_ASG_STACK_NAME} from prod ELB ${PRODUCTION_ELB_STACK_NAME}"
+      disassociateASGWithELB(region, WEB_ASG_STACK_NAME,  PRODUCTION_ELB_STACK_NAME)
+    }
   }
 
   def rollback_deployment() {
