@@ -12,6 +12,8 @@ node {
       
    def region = "us-east-1"
    
+   AMIID="ami-60b6c60a"
+   
    // Initialzie Blue/Green deploy script
    sh "JOB_NAME=${env.JOB_NAME} BUILD_NUMBER=${env.BUILD_NUMBER} scripts/bgdeploy.groovy --region ${region} --ami-id ${AMIID} --elb-stack ${PRODUCTION_ELB_STACK_NAME} --init"
 
