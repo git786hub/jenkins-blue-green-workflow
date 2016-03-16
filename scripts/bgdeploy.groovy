@@ -375,7 +375,7 @@ class BGDeploy {
       def counts = null
   
       if(!groups.isEmpty()) {
-        group = groups.get(0)
+        def group = groups.get(0)
         println group
         counts = new HashMap()
         counts.put("min", group.minSize)
