@@ -11,6 +11,7 @@ import com.amazonaws.services.cloudformation.model.DescribeStacksRequest
 import com.amazonaws.services.cloudformation.model.DescribeStackResourcesRequest
 import com.amazonaws.services.autoscaling.AmazonAutoScalingClient
 import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsRequest
+import com.amazonaws.services.autoscaling.model.UpdateAutoScalingGroupRequest
 
 import java.util.List
 
@@ -98,9 +99,17 @@ class BGDeploy {
     waitForCfnStackCreation(region, STAGING_ELB_STACK_NAME)
     
     // Update autoscaling group in web stack to match the min/max/desired counts in previous prod stack
+    def previous_asg_counts = null
     if(PREVIOUS_ASG_STACK_NAME != null) {
-      def asg_counts = getWebASGMinMaxDesiredCounts(PREVIOUS_ASG_STACK_NAME)
-      println asg_counts
+      asg_counts = getWebASGMinMaxDesiredCounts(PREVIOUS_ASG_STACK_NAME)
+      println "DEBUG: asg_counts=${asg_counts}"
+      updateASGCounts(WEB_ASG_STACK_NAME, asg_counts)
+    }
+    
+    // Wait for autoscaling group to scale to desired count
+    if(previous_asg_counts != null) {
+      println "Waiting for autoscaling group in stack ${WEB_ASG_STACK_NAME} to scale to desired count"
+      waitForASGToScaleToDesirecCount(WEB_ASG_STACK_NAME, asg_counts.get("desired")
     }
   
     // Associate Staging ELB with AutoScaling group
@@ -121,6 +130,20 @@ class BGDeploy {
     // Associate Production ELB with AutoScaling group
     println "Associating production ELB ${PRODUCTION_ELB_STACK_NAME} with Green ASG ${WEB_ASG_STACK_NAME}"
     associateASGWithELB(region, WEB_ASG_STACK_NAME,  PRODUCTION_ELB_STACK_NAME)
+    
+    // Update autoscaling group in web stack to match the min/max/desired counts in previous prod stack
+    def previous_asg_counts = null
+    if(PREVIOUS_ASG_STACK_NAME != null) {
+      asg_counts = getWebASGMinMaxDesiredCounts(PREVIOUS_ASG_STACK_NAME)
+      println "DEBUG: asg_counts=${asg_counts}"
+      updateASGCounts(WEB_ASG_STACK_NAME, asg_counts)
+    }
+    
+    // Wait for autoscaling group to scale to desired count
+    if(previous_asg_counts != null) {
+      println "Waiting for autoscaling group in stack ${WEB_ASG_STACK_NAME} to scale to desired count"
+      waitForASGToScaleToDesirecCount(WEB_ASG_STACK_NAME, asg_counts.get("desired")
+    }
  
     // Wait for the ELB to put instances in service
     println "Waiting for instances to go in service"
@@ -138,6 +161,20 @@ class BGDeploy {
         
         println "Associating ASG ${PREVIOUS_ASG_STACK_NAME} with ELB ${PRODUCTION_ELB_STACK_NAME}"
         associateASGWithELB(region, PREVIOUS_ASG_STACK_NAME,  PRODUCTION_ELB_STACK_NAME)
+        
+        // Update previous prod autoscaling group in web stack to match the min/max/desired counts in green stack
+        def previous_asg_counts = null
+        if(PREVIOUS_ASG_STACK_NAME != null) {
+          asg_counts = getWebASGMinMaxDesiredCounts(WEB_ASG_STACK_NAME)
+          println "DEBUG: asg_counts=${asg_counts}"
+          updateASGCounts(PREVIOUS_ASG_STACK_NAME, asg_counts)
+        }
+    
+        // Wait for autoscaling group to scale to desired count
+        if(previous_asg_counts != null) {
+          println "Waiting for autoscaling group in stack ${PREVIOUS_ASG_STACK_NAME} to scale to desired count"
+          waitForASGToScaleToDesirecCount(PREVIOUS_ASG_STACK_NAME, asg_counts.get("desired")
+        }
 
         // Wait for the ELB to put instances in service
         println "Waiting for ASG instances in ${PREVIOUS_ASG_STACK_NAME} to go in service "
@@ -349,6 +386,46 @@ class BGDeploy {
       return counts
     }
     
+    def updateASGCounts(def stackName, def counts) {
+  
+      def webStackAsgName = null
+      def webStackAsgResource = getCloudFormationResource(stackName, "WebASG")
+      if(webStackAsgResource != null) {
+        webStackAsgName = webStackAsgResource.physicalResourceId
+      }
+  
+      def updateASGRequest = new UpdateAutoScalingGroupRequest()
+      updateASGRequest.minSize = counts.get("min")
+      updateASGRequest.maxSize = counts.get("max")
+      updateASGRequest.desiredCapacity = counts.get("desired")
+      def updateASGResult = ASG_CLIENT.updateAutoScalingGroup(updateASGRequest)
+      println "Updating AutoScaling Group in stack ${stackName} to counts ${counts}. Result=${updateASGResult}"
+
+    }
+    
+    def waitForASGToScaleToDesirecCount(def stackName, def desiredCount) {
+      def TIMEOUT = 900
+  
+      def time_start = System.currentTimeMillis()
+      def done = false
+  
+      while(!done) {
+        def counts = getWebASGMinMaxDesiredCounts(stackName)
+        if(counts.get("desired") == desiredCount) {
+          println "ASG in stack ${stackName} has scaled to the desired count: ${desiredCount}"
+          done = true
+        } else {
+          println "Waiting for ASG in stack ${stackName} to scale up to desired count (${desiredCount}), currently at ${counts.get("desired")}"
+          Thread.sleep(60 * 1000)
+      
+          def seconds_elapsed = (System.currentTimeMillis() - time_start) / 1000
+          if(seconds_elapsed > TIMEOUT) {
+            println "ERROR: Timed out waiting for ASG in stack ${stackName} to scale to desired count"
+            throw new RuntimeException("Timed out waiting for ASG in stack ${stackName} to scale to desired count")
+          }
+        }
+      }
+    }
     
 }
 
