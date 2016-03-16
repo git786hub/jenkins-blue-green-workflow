@@ -12,7 +12,7 @@
   },
   
   "Resources" : {
-    "ELB" : {
+    "WebELB" : {
       "Type" : "AWS::ElasticLoadBalancing::LoadBalancer",
       "Properties" : {
         "Listeners": [

@@ -8,88 +8,29 @@ node {
    def WEB_ASG_STACK_NAME = "web-asg-" + env.BUILD_NUMBER
    def STAGING_ELB_STACK_NAME = "staging-elb-" + env.BUILD_NUMBER
    
-   def PRODUCTION_ELB_STACK_NAME = "bluegreen-poc-elb-prod"
+   def PRODUCTION_ELB_STACK_NAME = "prod-web-elb"
       
-   def regions = new ArrayList()
-   regions.add("us-east-1")
-   regions.add("us-west-1")
+   def region = "us-east-1"
+   
+   // Initialzie Blue/Green deploy script
+   sh "JOB_NAME=${env.JOB_NAME} BUILD_NUMBER=${env.BUILD_NUMBER} scripts/bgdeploy.groovy --region ${region} --ami-id ${AMIID} --elb-stack ${PRODUCTION_ELB_STACK_NAME} --init"
 
    stage "CreateStacks"
+   sh "scripts/bgdeploy.groovy --create-stacks"
    
-   // Start stack creations
-   regions.each { region->
-          
-     createCfnStack(region, "cfn/web-asg.json", "cfn/${region}-web-asg-param.properties", WEB_ASG_STACK_NAME, "production")
-     createCfnStack(region, "cfn/elb.json",     "cfn/${region}-elb-param.properties", STAGING_ELB_STACK_NAME, "staging")
-   }
-   
-   // Wait for CloudFormation stack creation
-   regions.each { region->
-     waitForCfnStackCreation(region, WEB_ASG_STACK_NAME)
-     waitForCfnStackCreation(region, STAGING_ELB_STACK_NAME)
-   }
-   
-   stage "AssociateWebStackWithStagingELB"
-   
-   // Associate Staging ELB with AutoScaling group
-   regions.each { region->
-     associateASGWithELB(region, WEB_ASG_STACK_NAME,  STAGING_ELB_STACK_NAME)
-   }
-   
-   // Sleep for ASG instances to be registered
-   sleep 60
-   
-   // Wait for the ELB to put instances in service
-   regions.each { region->
-     waitForASGInstancesToGoInService(region, WEB_ASG_STACK_NAME, STAGING_ELB_STACK_NAME)
-   }
-   
-   // Test
-   
-   
-   // Disassociate Staging ELB from Green ASG
-   regions.each { region->
-     disassociateASGWithELB(region, WEB_ASG_STACK_NAME,  STAGING_ELB_STACK_NAME)
-   }
-   
-   // Associate Production ELB with AutoScaling group
-   regions.each { region->
-     associateASGWithELB(region, WEB_ASG_STACK_NAME,  PRODUCTION_ELB_STACK_NAME)
-   }
-   
-   // Sleep for ASG instances to be registered
-   sleep 60
-   
-   // Wait for the ELB to put instances in service
-   regions.each { region->
-     waitForASGInstancesToGoInService(region, WEB_ASG_STACK_NAME, PRODUCTION_ELB_STACK_NAME)
-   }
-   
-   // TODO: Disassociate old blue stack
-}
-
-def createCfnStack(def awsRegion, def templateFile, def paramFile, def stackName, def environmentType) {
-  // Execute create-stack command
-  sh "AWS_DEFAULT_REGION=${awsRegion} scripts/create_stack.py ${stackName} ${templateFile} ${paramFile} ${environmentType}"
-}
-
-def deleteCfnStack(def awsRegion, def stackName) {
-  // Execute create-stack command
-  sh "AWS_DEFAULT_REGION=${awsRegion} scripts/delete_stack.py ${stackName}"
-}
-
-def waitForCfnStackCreation(def awsRegion, def stackName) {
-  sh "AWS_DEFAULT_REGION=${awsRegion} scripts/wait_for_stack_create.py ${stackName} "
-}
-
-def associateASGWithELB(def awsRegion, def asgStack, def elbStack) {
-  sh "AWS_DEFAULT_REGION=${awsRegion} scripts/assoc_asg_elb.py ${asgStack} ${elbStack} "
-}
-
-def disassociateASGWithELB(def awsRegion, def asgStack, def elbStack) {
-  sh "AWS_DEFAULT_REGION=${awsRegion} scripts/deassoc_asg_elb.py ${asgStack} ${elbStack} "
-}
-
-def waitForASGInstancesToGoInService(def awsRegion, def asgStack, def elbStack) {
-  sh "AWS_DEFAULT_REGION=${awsRegion} scripts/wait_for_asg_elb_registration.py ${asgStack} ${elbStack} "
+   stage "Flip Green to Blue"
+   sh "scripts/bgdeploy.groovy --flip-green-to-blue"
+  
+   stage "Cleanup"
+   def userInput = input (id: 'userInput',  message: 'Proceed with deployment?', parameters: [[$class: 'ChoiceParameterDefinition', choices: "Yes\nNo", description: 'Proceed with deployment?', name: 'proceed']])
+   if(userInput.equals("No")) {
+     // Abort deployment and rollback
+     
+     print "Rolling back deployment"
+     sh "scripts/bgdeploy.groovy --rollback"
+     print "Rollback completed" 
+  } else {
+    // Cleanup.  Remove test ELB stack and old production stack
+    sh "scripts/bgdeploy.groovy --cleanup"
+  }
 }

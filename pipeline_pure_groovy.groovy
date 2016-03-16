@@ -35,25 +35,31 @@ node {
    stackNames.add( green_web_stack_name  )
    stackNames.add( staging_elb_stack_name )
    
-   while(true) {
-     boolean done = true
-     for(def stackName : stackNames) {
-       if(!isStackCreated(stackName)) {
-         done = false
-       }
-     }
-     if(done) {
-       break
-     } else {
-       sleep 10
-     }
-   }
+   waitForStackCreate( stackNames )
+   
+   
    
    
 
 }
 
 // ============================================================================
+
+def waitForStackCreate( def stackNames ) {
+  while(true) {
+    boolean done = true
+    stackNames.each { stackName->
+      if(!isStackCreated(stackName)) {
+        done = false
+      }
+    }
+    if(done) {
+      break
+    } else {
+      sleep 10
+    }
+  }
+}
 
 def create_cfn_stack(def region, def stackName, def template, def paramsJson, def environmentType) {
   

@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import boto3
+import os
 import sys
 import time
 
@@ -29,24 +30,29 @@ def wait_for_asg_elb_registration(asgStackName, elbStackName):
   start_time = int(time.time())
   
   while 1:
-    elb_desc_health_resp = elb.describe_instance_health(LoadBalancerName=elb_name, Instances=instances)
-    instance_states = elb_desc_health_resp['InstanceStates']
+    try:
+      elb_desc_health_resp = elb.describe_instance_health(LoadBalancerName=elb_name, Instances=instances)
+      instance_states = elb_desc_health_resp['InstanceStates']
     
-    all_in_service = True
-    for instance_state in instance_states:
-      if instance_state['State'] != 'InService':
-        all_in_service = False
-        break
+      all_in_service = True
+      for instance_state in instance_states:
+        if instance_state['State'] != 'InService':
+          all_in_service = False
+          break
     
-    if all_in_service:
-      print "All instances are now in service. ASG=%s ELB=%s" % (asg_name, elb_name)
-      sys.exit(0)
+      if all_in_service:
+        print "All instances are now in service. ASG=%s ELB=%s" % (asg_name, elb_name)
+        sys.exit(0)
     
-    current_time = int(time.time())
-    elapsed_time = current_time - start_time
-    if(elapsed_time > TIMEOUT):
-      print "Timed out waiting for instances to go in service."
-      sys.exit(1)
+      current_time = int(time.time())
+      elapsed_time = current_time - start_time
+      if(elapsed_time > TIMEOUT):
+        print "Timed out waiting for instances to go in service."
+        sys.exit(1)
+    
+    except Exception as ex:
+      print "Unable to describe instances in the ELB at this time.  Instances may not have been registered with the ELB yet."
+      print ex
     
     print "Waiting for instances to go in service."
     time.sleep(60)
@@ -55,8 +61,6 @@ def wait_for_asg_elb_registration(asgStackName, elbStackName):
 def main(argv):
   asgStackName    = sys.argv[1]
   elbStackName    = sys.argv[2]
-  
-  print "=== wait_for_asg_elb_registration.py ==="
   
   wait_for_asg_elb_registration(asgStackName, elbStackName)
   
