@@ -102,14 +102,14 @@ class BGDeploy {
     def previous_asg_counts = null
     if(PREVIOUS_ASG_STACK_NAME != null) {
       previous_asg_counts = getWebASGMinMaxDesiredCounts(PREVIOUS_ASG_STACK_NAME)
-      println "DEBUG: asg_counts=${asg_counts}"
+      println "DEBUG: previous_asg_counts=${previous_asg_counts}"
       updateASGCounts(WEB_ASG_STACK_NAME, previous_asg_counts)
     }
     
     // Wait for autoscaling group to scale to desired count
     if(previous_asg_counts != null) {
       println "Waiting for autoscaling group in stack ${WEB_ASG_STACK_NAME} to scale to desired count"
-      waitForASGToScaleToDesirecCount(WEB_ASG_STACK_NAME, asg_counts.get("desired"))
+      waitForASGToScaleToDesirecCount(WEB_ASG_STACK_NAME, previous_asg_counts.get("desired"))
     }
   
     // Associate Staging ELB with AutoScaling group
@@ -135,14 +135,14 @@ class BGDeploy {
     def previous_asg_counts = null
     if(PREVIOUS_ASG_STACK_NAME != null) {
       previous_asg_counts = getWebASGMinMaxDesiredCounts(PREVIOUS_ASG_STACK_NAME)
-      println "DEBUG: asg_counts=${asg_counts}"
-      updateASGCounts(WEB_ASG_STACK_NAME, asg_counts)
+      println "DEBUG: previous_asg_counts=${previous_asg_counts}"
+      updateASGCounts(WEB_ASG_STACK_NAME, previous_asg_counts)
     }
     
     // Wait for autoscaling group to scale to desired count
     if(previous_asg_counts != null) {
       println "Waiting for autoscaling group in stack ${WEB_ASG_STACK_NAME} to scale to desired count"
-      waitForASGToScaleToDesirecCount(WEB_ASG_STACK_NAME, asg_counts.get("desired"))
+      waitForASGToScaleToDesirecCount(WEB_ASG_STACK_NAME, previous_asg_counts.get("desired"))
     }
  
     // Wait for the ELB to put instances in service
@@ -166,14 +166,14 @@ class BGDeploy {
         def previous_asg_counts = null
         if(PREVIOUS_ASG_STACK_NAME != null) {
           previous_asg_counts = getWebASGMinMaxDesiredCounts(WEB_ASG_STACK_NAME)
-          println "DEBUG: asg_counts=${asg_counts}"
-          updateASGCounts(PREVIOUS_ASG_STACK_NAME, asg_counts)
+          println "DEBUG: previous_asg_counts=${previous_asg_counts}"
+          updateASGCounts(PREVIOUS_ASG_STACK_NAME, previous_asg_counts)
         }
     
         // Wait for autoscaling group to scale to desired count
         if(previous_asg_counts != null) {
           println "Waiting for autoscaling group in stack ${PREVIOUS_ASG_STACK_NAME} to scale to desired count"
-          waitForASGToScaleToDesirecCount(PREVIOUS_ASG_STACK_NAME, asg_counts.get("desired"))
+          waitForASGToScaleToDesirecCount(PREVIOUS_ASG_STACK_NAME, previous_asg_counts.get("desired"))
         }
 
         // Wait for the ELB to put instances in service
