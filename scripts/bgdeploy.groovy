@@ -209,11 +209,7 @@ class BGDeploy {
       deleteCfnStack(region, STAGING_ELB_STACK_NAME)
 
       if(PREVIOUS_ASG_STACK_NAME != null && PREVIOUS_ASG_STACK_NAME.length() > 0) { // Skip of nothing to cleanup
-    
-        // Disassociate Prod ELB from previous build's ASG
-        println "Disassociating ASG ${PREVIOUS_ASG_STACK_NAME} from ELB ${PRODUCTION_ELB_STACK_NAME}"
-        disassociateASGWithELB(region, PREVIOUS_ASG_STACK_NAME,  PRODUCTION_ELB_STACK_NAME)
-    
+        
         // Decom old stacks
         println "Deleting stack ${PREVIOUS_ASG_STACK_NAME}"
         deleteCfnStack(region, PREVIOUS_ASG_STACK_NAME)
