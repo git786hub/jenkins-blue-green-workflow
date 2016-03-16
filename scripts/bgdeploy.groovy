@@ -410,12 +410,28 @@ class BGDeploy {
       def done = false
   
       while(!done) {
-        def counts = getWebASGMinMaxDesiredCounts(stackName)
-        if(counts.get("desired") == desiredCount) {
+        
+        def webStackAsgName = null
+        def webStackAsgResource = getCloudFormationResource(stackName, "WebASG")
+        if(webStackAsgResource != null) {
+          webStackAsgName = webStackAsgResource.physicalResourceId
+        }
+        
+        def descAsgRequest = new DescribeAutoScalingGroupsRequest().withAutoScalingGroupNames(webStackAsgName)
+        def groups = ASG_CLIENT.describeAutoScalingGroups(descAsgRequest).getAutoScalingGroups()
+        
+        def instances = null
+    
+        if(!groups.isEmpty()) {
+          def group = groups.get(0)
+          instances = group.instances
+        }
+        
+        if(instances.size() == desiredCount) {
           println "ASG in stack ${stackName} has scaled to the desired count: ${desiredCount}"
           done = true
         } else {
-          println "Waiting for ASG in stack ${stackName} to scale up to desired count (${desiredCount}), currently at ${counts.get("desired")}"
+          println "Waiting for ASG in stack ${stackName} to scale up to desired count (${desiredCount}), currently at ${instances.size()}"
           Thread.sleep(60 * 1000)
       
           def seconds_elapsed = (System.currentTimeMillis() - time_start) / 1000
