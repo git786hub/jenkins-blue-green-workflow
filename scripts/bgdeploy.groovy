@@ -96,6 +96,12 @@ class BGDeploy {
     println "Waiting for stacks to be created"
     waitForCfnStackCreation(region, WEB_ASG_STACK_NAME)
     waitForCfnStackCreation(region, STAGING_ELB_STACK_NAME)
+    
+    // Update autoscaling group in web stack to match the min/max/desired counts in previous prod stack
+    if(PREVIOUS_ASG_STACK_NAME != null) {
+      def asg_counts = getWebASGMinMaxDesiredCounts(PREVIOUS_ASG_STACK_NAME)
+      println asg_counts
+    }
   
     // Associate Staging ELB with AutoScaling group
     println "Associating ASG ${WEB_ASG_STACK_NAME} with ELB ${STAGING_ELB_STACK_NAME}"
