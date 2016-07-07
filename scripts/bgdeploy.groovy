@@ -13,6 +13,8 @@ import com.amazonaws.services.cloudformation.model.DescribeStackResourcesRequest
 import com.amazonaws.services.autoscaling.AmazonAutoScalingClient
 import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsRequest
 import com.amazonaws.services.autoscaling.model.UpdateAutoScalingGroupRequest
+import com.amazonaws.services.autoscaling.model.ResumeProcessesRequest
+import com.amazonaws.services.autoscaling.model.SuspendProcessesRequest
 
 import java.util.List
 
@@ -117,6 +119,9 @@ class BGDeploy {
       updateASGCounts(WEB_ASG_STACK_NAME, previous_asg_counts)
     }
     
+    // Pause Scaling
+    suspendScaling(WEB_ASG_STACK_NAME);
+    
     // Wait for autoscaling group to scale to desired count
     if(previous_asg_counts != null) {
       println "Waiting for autoscaling group in stack ${WEB_ASG_STACK_NAME} to scale to desired count"
@@ -166,6 +171,9 @@ class BGDeploy {
       println "Disassociating blue ASG stack ${PREVIOUS_ASG_STACK_NAME} from prod ELB ${PRODUCTION_ELB_STACK_NAME}"
       disassociateASGWithELB(region, PREVIOUS_ASG_STACK_NAME,  PRODUCTION_ELB_STACK_NAME)
     }
+    
+    // Resume scaling
+    resumeScaling(WEB_ASG_STACK_NAME)
   }
 
   def rollback_deployment() {
@@ -187,6 +195,9 @@ class BGDeploy {
           println "DEBUG: previous_asg_counts=${previous_asg_counts}"
           updateASGCounts(PREVIOUS_ASG_STACK_NAME, previous_asg_counts)
         }
+        
+        // Pause scaling
+        suspendScaling(PREVIOUS_ASG_STACK_NAME);
     
         // Wait for autoscaling group to scale to desired count
         if(previous_asg_counts != null) {
@@ -209,6 +220,9 @@ class BGDeploy {
         // Wait for the ELB to put instances in service
         println "Waiting for instances to go in service"
         waitForASGInstancesToGoInService(region, WEB_ASG_STACK_NAME, STAGING_ELB_STACK_NAME)
+        
+        // Resume scaling
+        resumeScaling(PREVIOUS_ASG_STACK_NAME);
       }
     }
 
@@ -347,6 +361,34 @@ class BGDeploy {
       }
   
       return stacksAssociatedWithELB.get(0)  
+    }
+    
+    def suspendScaling(def asgStackName) {
+        
+        def webStackAsgName = null
+        def webStackAsgResource = getCloudFormationResource(asgStackName, "WebASG")
+        if(webStackAsgResource != null) {
+          webStackAsgName = webStackAsgResource.physicalResourceId
+        }
+        
+        ASG_CLIENT.suspendProcesses(new SuspendProcessesRequest()
+                                        .withScalingProcesses(["AlarmNotification"])
+                                        .withAutoScalingGroupName(webStackAsgName)
+                                    )
+    }
+    
+    def resumeScaling(def asgStackName) {
+        
+        def webStackAsgName = null
+        def webStackAsgResource = getCloudFormationResource(asgStackName, "WebASG")
+        if(webStackAsgResource != null) {
+          webStackAsgName = webStackAsgResource.physicalResourceId
+        }
+        
+        ASG_CLIENT.resumeProcesses(new ResumeProcessesRequest()
+                                        .withScalingProcesses(["AlarmNotification"])
+                                        .withAutoScalingGroupName(webStackAsgName)
+                                    )
     }
 
     def getCloudFormationStackByName(def stackName) {
