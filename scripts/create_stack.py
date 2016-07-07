@@ -32,7 +32,7 @@ def create_stack(stackName, templateFile, paramFilename, environmentType):
   cf.create_stack(StackName=stackName,
                   TemplateBody=template,
                   Parameters=params,
-                  Capabilities=[ 'CAPABILITY_IAM '])
+                  Capabilities=[ 'CAPABILITY_IAM', ])
 
 def main(argv):
   stackName       = sys.argv[1]
