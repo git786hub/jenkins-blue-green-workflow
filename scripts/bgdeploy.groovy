@@ -3,6 +3,7 @@
 @Grab(group='com.amazonaws', module='aws-java-sdk-cloudformation', version='1.10.57')
 @Grab(group='com.amazonaws', module='aws-java-sdk-autoscaling', version='1.10.57')
 
+import com.amazonaws.regions.Regions
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClient
 import com.amazonaws.services.cloudformation.model.ListStacksRequest
 import com.amazonaws.services.cloudformation.model.StackSummary
@@ -35,6 +36,11 @@ class BGDeploy {
   def init() {
   
     props = new Properties()
+    
+    // Set regions
+    def AWS_DEFAULT_REGION = Regions.fromName(region)
+    CFN_CLIENT.region = AWS_DEFAULT_REGION
+    ASG_CLIENT.region = AWS_DEFAULT_REGION
   
     def WEB_ASG_STACK_NAME_PREFIX = env['JOB_NAME'] + "-web-asg-"
     WEB_ASG_STACK_NAME =  WEB_ASG_STACK_NAME_PREFIX + env['BUILD_NUMBER']
