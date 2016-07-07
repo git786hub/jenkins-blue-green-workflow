@@ -36,11 +36,7 @@ class BGDeploy {
   def init() {
   
     props = new Properties()
-    
-    // Set regions
-    def AWS_DEFAULT_REGION = Regions.fromName(region)
-    CFN_CLIENT.region = AWS_DEFAULT_REGION
-    ASG_CLIENT.region = AWS_DEFAULT_REGION
+    setRegion()
   
     def WEB_ASG_STACK_NAME_PREFIX = env['JOB_NAME'] + "-web-asg-"
     WEB_ASG_STACK_NAME =  WEB_ASG_STACK_NAME_PREFIX + env['BUILD_NUMBER']
@@ -73,6 +69,13 @@ class BGDeploy {
     // Write properties for later use
     props.store(prop_file.newWriter(), null)
   }
+  
+  def setRegion() {
+      // Set regions
+      def AWS_DEFAULT_REGION = Regions.fromName(region)
+      CFN_CLIENT.region = AWS_DEFAULT_REGION
+      ASG_CLIENT.region = AWS_DEFAULT_REGION
+  }
 
   def load_props() {
     props.load(prop_file.newDataInputStream())
@@ -83,6 +86,8 @@ class BGDeploy {
   
     region = props.get("region")
     amiId = props.get("amiId")
+    
+    setRegion()
   }
 
   def process_property_files() {

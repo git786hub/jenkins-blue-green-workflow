@@ -20,8 +20,8 @@ def wait_for_asg_elb_registration(asgStackName, elbStackName):
   elb_name = elb_resource['StackResources'][0]['PhysicalResourceId']
 
   asg_group = autoscaling.describe_auto_scaling_groups(AutoScalingGroupNames=[asg_name])['AutoScalingGroups'][0]
-  asg_instances = asg_group['Instances']
 
+  asg_instances = asg_group['Instances']
   instances = []
 
   for asg_instance in asg_instances:
@@ -31,6 +31,9 @@ def wait_for_asg_elb_registration(asgStackName, elbStackName):
   
   while 1:
     try:
+      
+      
+      
       elb_desc_health_resp = elb.describe_instance_health(LoadBalancerName=elb_name, Instances=instances)
       instance_states = elb_desc_health_resp['InstanceStates']
     
