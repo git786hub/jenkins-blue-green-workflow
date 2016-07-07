@@ -4,6 +4,7 @@
 @Grab(group='com.amazonaws', module='aws-java-sdk-autoscaling', version='1.10.57')
 
 import com.amazonaws.regions.Regions
+import com.amazonaws.regions.Region
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClient
 import com.amazonaws.services.cloudformation.model.ListStacksRequest
 import com.amazonaws.services.cloudformation.model.StackSummary
@@ -74,7 +75,7 @@ class BGDeploy {
   
   def setRegion() {
       // Set regions
-      def AWS_DEFAULT_REGION = Regions.fromName(region)
+      def AWS_DEFAULT_REGION = Region.getRegion(Regions.fromName(region))
       CFN_CLIENT.region = AWS_DEFAULT_REGION
       ASG_CLIENT.region = AWS_DEFAULT_REGION
   }
